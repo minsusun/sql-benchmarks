@@ -21,7 +21,7 @@
 package com.ibm.crail.benchmarks
 
 import com.ibm.crail.benchmarks.tests.tpcds.{SingleTPCDSTest, TPCDSTest}
-import com.ibm.crail.benchmarks.tests.{EquiJoin, PageRank, ReadOnly}
+import com.ibm.crail.benchmarks.tests.{ConnectedComponents, EquiJoin, PageRank, ReadOnly}
 import org.apache.spark.sql.SparkSession
 
 object SQLTestFactory {
@@ -36,6 +36,8 @@ object SQLTestFactory {
       new ReadOnly(options, spark)
     } else if (options.isTestPageRank) {
       new PageRank(options, spark)
+    } else if (options.isTestConnectedComponents) {
+      new ConnectedComponents(options, spark)
     } else {
       throw new Exception("Illegal test name ")
     }

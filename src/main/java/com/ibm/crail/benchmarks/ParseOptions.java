@@ -119,7 +119,7 @@ public class ParseOptions {
                     /* specific query test */
                     this.tpcdsQuery = this.test;
                 }
-                if(this.isTestPageRank()){
+                if(this.isTestPageRank() || this.isTestConnectedComponents()){
                     /* for page rank, we have no op */
                     this.action = new Noop();
                 }
@@ -206,7 +206,7 @@ public class ParseOptions {
             errorAbort("ERROR:" + " please specify some input files for the SQL test");
         }
         // check valid test names
-        if(!isTestEquiJoin() && !isTestQuery() && !isTestTPCDS() && !isTestReadOnly() && !isTestPageRank()) {
+        if(!isTestEquiJoin() && !isTestQuery() && !isTestTPCDS() && !isTestReadOnly() && !isTestPageRank() && !isTestConnectedComponents()) {
             errorAbort("ERROR: illegal test name : " + this.test);
         }
         /* some sanity checks */
@@ -233,6 +233,10 @@ public class ParseOptions {
 
     public boolean isTestPageRank(){
         return this.test.compareToIgnoreCase("pagerank") == 0;
+    }
+
+    public boolean isTestConnectedComponents() {
+        return this.test.compareToIgnoreCase("cc") == 0;
     }
 
     public String[] getInputFiles(){
