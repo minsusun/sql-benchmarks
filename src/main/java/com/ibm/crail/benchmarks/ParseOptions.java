@@ -206,7 +206,7 @@ public class ParseOptions {
             errorAbort("ERROR:" + " please specify some input files for the SQL test");
         }
         // check valid test names
-        if(!isTestEquiJoin() && !isTestQuery() && !isTestTPCDS() && !isTestReadOnly() && !isTestPageRank() && !isTestConnectedComponents()) {
+        if(!isTestEquiJoin() && !isTestQuery() && !isTestTPCDS() && !isTestReadOnly() && !isTestPageRank() && !isTestConnectedComponents() && !isParquetConversion()) {
             errorAbort("ERROR: illegal test name : " + this.test);
         }
         /* some sanity checks */
@@ -237,6 +237,10 @@ public class ParseOptions {
 
     public boolean isTestConnectedComponents() {
         return this.test.compareToIgnoreCase("cc") == 0;
+    }
+
+    public boolean isParquetConversion() {
+        return this.test.compareToIgnoreCase("parquet") == 0 || this.test.compareToIgnoreCase("parquetconversion") == 0;
     }
 
     public String[] getInputFiles(){
