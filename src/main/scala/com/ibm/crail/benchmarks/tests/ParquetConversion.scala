@@ -38,7 +38,7 @@ class ParquetConversion (val options: ParseOptions, spark:SparkSession) extends 
     val v = VertexRDD.fromEdges(e, 1, 1)
     s += step("Convert to EdgeRDD and VertexRDD")
 
-    val reConstructedGraph = GraphImpl.fromExistingRDDs(v, e)
+    val reConstructedGraph = GraphImpl.fromExistingRDDs(v, e).cache()
     s += step("[GraphX]Construct Graph with RDDs")
 
     s
