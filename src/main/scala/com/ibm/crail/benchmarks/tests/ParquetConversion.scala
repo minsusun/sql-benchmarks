@@ -11,7 +11,7 @@ class ParquetConversion (val options: ParseOptions, spark:SparkSession) extends 
 
   def step(StepName: String): String = {
     val now = System.nanoTime();
-    val info = s"\n\t\t Step '" + StepName + s"': ${(now - stepTime)/1000000} ms"
+    val info = s"\n\t\t\t\tStep '" + StepName + s"': ${(now - stepTime)/1000000} ms"
     stepTime = now;
     info
   }
