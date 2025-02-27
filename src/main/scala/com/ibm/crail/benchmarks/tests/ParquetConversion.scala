@@ -22,7 +22,7 @@ class ParquetConversion (val options: ParseOptions, spark:SparkSession) extends 
 
     // Start Auxiliary GraphLoader
     // Src: spark/src/main/scala/org/apache/spark/graphx/GraphLoader.scala
-    val AuxGraph = {
+    val graph = {
       val sc =spark.sparkContext
       val path = options.getInputFiles()(0)
       val edgeStorageLevel = StorageLevel.MEMORY_ONLY
@@ -57,12 +57,12 @@ class ParquetConversion (val options: ParseOptions, spark:SparkSession) extends 
         vertexStorageLevel = vertexStorageLevel)
     }
     s += step("[AuxGraphLoader]Construct Graph From Edge Partitions")
-    AuxGraph.cache()
+    graph.cache()
     s += step("[AuxGraphLoader]Cache")
     // End Auxiliary GraphLoader
 
-    val graph = GraphLoader.edgeListFile(spark.sparkContext, options.getInputFiles()(0)).cache()
-    s += step("[GraphX]Graph Load")
+//    val graph = GraphLoader.edgeListFile(spark.sparkContext, options.getInputFiles()(0)).cache()
+//    s += step("[GraphX]Graph Load")
 
     val edgeDF = spark.createDataFrame(graph.edges)
     s += step("[Edge]RDD->DF")
