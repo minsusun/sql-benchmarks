@@ -1,14 +1,49 @@
 package com.ibm.crail.benchmarks.tests
 
 import com.ibm.crail.benchmarks.{ParseOptions, SQLTest}
+import org.apache.spark.SparkContext
 import org.apache.spark.graphx.impl.GraphImpl
-import org.apache.spark.graphx.{Edge, EdgeRDD, GraphLoader, GraphXHelper, VertexRDD}
+import org.apache.spark.graphx.{Edge, EdgeRDD, GraphLoader, GraphXHelper, VertexRDD, Graph}
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.storage.StorageLevel
 
 class ParquetConversion (val options: ParseOptions, spark:SparkSession) extends SQLTest(spark) {
 
+  private var s = "";
   private var stepTime = System.nanoTime();
+
+  def loader(sc: SparkContext, path: String): Graph[Int, Int] = {
+    val edgeStorageLevel = StorageLevel.MEMORY_ONLY
+    val vertexStorageLevel = StorageLevel.MEMORY_ONLY
+
+    val lines = sc.textFile(path)
+    s += step("[AuxGraphLoader]Spark TextFile Read")
+
+    val edges = lines.mapPartitionsWithIndex { (pid, iter) =>
+      val h = new GraphXHelper()
+      val b = h.instance
+
+//      val builder = new EdgePartitionBuilder[Int, Int]
+      iter.foreach { line =>
+        if (!line.isEmpty && line(0) != '#') {
+          val lineArray = line.split("\\s+")
+          if (lineArray.length < 2) {
+            throw new IllegalArgumentException("Invalid line: " + line)
+          }
+          val srcId = lineArray(0).toLong
+          val dstId = lineArray(1).toLong
+          //            builder.add(srcId, dstId, 1)
+          b.add(srcId, dstId, 1)
+        }
+      }
+      //        Iterator((pid, builder.toEdgePartition))
+      Iterator((pid, h.method))
+    }.persist(edgeStorageLevel).setName("GraphLoader.edgeListFile - edges (%s)".format(path))
+    s += step("[AuxGraphLoader]Edge Partition Build From Textfile")
+
+    GraphImpl.fromEdgePartitions(edges, defaultVertexAttr = 1, edgeStorageLevel = edgeStorageLevel,
+      vertexStorageLevel = vertexStorageLevel)
+  }
 
   def step(StepName: String): String = {
     val now = System.nanoTime();
@@ -18,49 +53,8 @@ class ParquetConversion (val options: ParseOptions, spark:SparkSession) extends 
   }
 
   override def execute(): String = {
-    var s = "Ran Parquet Conversion on" + options.getInputFiles()(0)
-
-    // Start Auxiliary GraphLoader
-    // Src: spark/src/main/scala/org/apache/spark/graphx/GraphLoader.scala
-    val graph = {
-      val sc =spark.sparkContext
-      val path = options.getInputFiles()(0)
-      val edgeStorageLevel = StorageLevel.MEMORY_ONLY
-      val vertexStorageLevel = StorageLevel.MEMORY_ONLY
-
-      val lines = sc.textFile(path)
-      s += step("[AuxGraphLoader]Spark TextFile Read")
-
-      val edges = lines.mapPartitionsWithIndex { (pid, iter) =>
-        val h = new GraphXHelper()
-        val b = h.instance
-
-//        val builder = new EdgePartitionBuilder[Int, Int]
-        iter.foreach { line =>
-          if (!line.isEmpty && line(0) != '#') {
-            val lineArray = line.split("\\s+")
-            if (lineArray.length < 2) {
-              throw new IllegalArgumentException("Invalid line: " + line)
-            }
-            val srcId = lineArray(0).toLong
-            val dstId = lineArray(1).toLong
-//            builder.add(srcId, dstId, 1)
-            b.add(srcId, dstId, 1)
-          }
-        }
-//        Iterator((pid, builder.toEdgePartition))
-        Iterator((pid, h.method))
-      }.persist(edgeStorageLevel).setName("GraphLoader.edgeListFile - edges (%s)".format(path))
-      s += step("[AuxGraphLoader]Edge Partition Build From Textfile")
-
-      GraphImpl.fromEdgePartitions(edges, defaultVertexAttr = 1, edgeStorageLevel = edgeStorageLevel,
-        vertexStorageLevel = vertexStorageLevel)
-    }
-    s += step("[AuxGraphLoader]Construct Graph From Edge Partitions")
-    graph.cache()
-    s += step("[AuxGraphLoader]Cache")
-    // End Auxiliary GraphLoader
-
+    s = "Ran Parquet Conversion on" + options.getInputFiles()(0)
+    val graph = loader(spark.sparkContext, options.getInputFiles()(0)).cache()
 //    val graph = GraphLoader.edgeListFile(spark.sparkContext, options.getInputFiles()(0)).cache()
 //    s += step("[GraphX]Graph Load")
 
