@@ -57,6 +57,8 @@ class ParquetConversion (val options: ParseOptions, spark:SparkSession) extends 
         vertexStorageLevel = vertexStorageLevel)
     }
     s += step("[AuxGraphLoader]Construct Graph From Edge Partitions")
+    AuxGraph.cache()
+    s += step("[AuxGraphLoader]Cache")
     // End Auxiliary GraphLoader
 
     val graph = GraphLoader.edgeListFile(spark.sparkContext, options.getInputFiles()(0)).cache()
