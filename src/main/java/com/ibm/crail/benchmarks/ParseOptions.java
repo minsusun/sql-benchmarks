@@ -72,7 +72,7 @@ public class ParseOptions {
         options.addOption("of", "outputFormat", true, "output format (where-ever applicable) default: parquet");
         options.addOption("ofo", "outputFormatOptions", true, "output format options as key0,value0,key1,value1...");
         options.addOption("gi", "graphPRIterations", true, "number of iteration for the PageRank algorithm, default " + this.pageRankIterations);
-        options.addOption("aux", "auxGraphLoader", true, "whether to use auxiliary graph loader");
+        options.addOption("aux", "auxGraphLoader", false, "whether to use auxiliary graph loader");
 
         // set defaults
         this.test = "readOnly";
