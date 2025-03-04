@@ -10,5 +10,9 @@ trait LogTrait {
     lastStepTime = now
   }
 
+  def concatLog(externalLogString: String): Unit = {
+    logString += externalLogString
+  }
+
   def logToString: String = logString;
 }
