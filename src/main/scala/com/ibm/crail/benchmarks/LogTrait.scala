@@ -14,5 +14,9 @@ trait LogTrait {
     logString += externalLogString
   }
 
+  def forceUpdate(): Unit = {
+    lastStepTime = System.nanoTime();
+  }
+
   def logToString: String = logString;
 }
