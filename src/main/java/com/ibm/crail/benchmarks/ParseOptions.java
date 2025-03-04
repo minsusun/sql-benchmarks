@@ -43,6 +43,7 @@ public class ParseOptions {
     private Map<String, String> inputFormatOptions;
     private Map<String, String> outputFormatOptions;
     private int pageRankIterations = 8;
+    private boolean auxGraphLoader = false;
 
     public ParseOptions(){
 
@@ -71,6 +72,7 @@ public class ParseOptions {
         options.addOption("of", "outputFormat", true, "output format (where-ever applicable) default: parquet");
         options.addOption("ofo", "outputFormatOptions", true, "output format options as key0,value0,key1,value1...");
         options.addOption("gi", "graphPRIterations", true, "number of iteration for the PageRank algorithm, default " + this.pageRankIterations);
+        options.addOption("aux", "auxGraphLoader", true, "whether to use auxiliary graph loader");
 
         // set defaults
         this.test = "readOnly";
@@ -197,6 +199,9 @@ public class ParseOptions {
                     errorAbort("ERROR: illegal action name : " + tokens[0]);
                 }
             }
+            if (cmd.hasOption("aux")) {
+                this.auxGraphLoader = true;
+            }
 
         } catch (ParseException e) {
             errorAbort("Failed to parse command line properties" + e);
@@ -292,5 +297,9 @@ public class ParseOptions {
     }
     public int getPageRankIterations(){
         return this.pageRankIterations;
+    }
+
+    public boolean getAuxGraphLoader(){
+        return this.auxGraphLoader;
     }
 }
